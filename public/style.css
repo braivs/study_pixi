@@ -1,0 +1,36 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.87);
+    background-color: #000000;
+}
+
+body {
+    display: flex;
+    align-items: center;      /* вертикальное центрирование */
+    justify-content: center;  /* горизонтальное центрирование */
+    background: #0f0f1a;      /* фон вокруг окна */
+}
+
+canvas {
+    display: block;
+    flex-shrink: 0;           /* не сжимать canvas */
+}
+
+#app {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;     /* не мешать кликам по canvas */
+}
+
+#pixi-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
