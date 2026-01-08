@@ -101,7 +101,32 @@ export async function exercise6() {
       if (columnSpeed < 0.1) {
         columnSpeed = 0
         isSpinning = false
+
+        // finding last visible symbol (most low before button)
+        let winningSymbol: Text | null = null
+        let maxY = visibleAreaTop
+
+        // Go via all symbols & find most low visible
+        for (let i = 0; i < symbolsInColumn; i++) {
+          const symbolY = columnsSymbols[i].y
+          // symbol is visible, if center of it in the area of visible view
+          if (symbolY >= visibleAreaTop && symbolY <= visibleAreaBottom) {
+            if (symbolY > maxY) {
+              maxY = symbolY
+              winningSymbol = columnsSymbols[i]
+            }
+          }
+        }
+
+        // show to console
+        if (winningSymbol) {
+          console.log('Wining symbol: ' + winningSymbol.text)
+        } else {
+          console.warn('Something went wrong')
+        }
       }
+
+
     }
   })
 
