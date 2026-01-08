@@ -42,6 +42,7 @@ export async function exercise6() {
 
   let isSpinning = false // Flag: is slot is spinning
   let columnSpeed = 0 // Speed of column scrolling
+  const CHANGE_SYMBOLS_EVERY_FRAME = false // Flag: change symbols every frame during spin, new experimental model
 
   // Button
   const button = new Graphics()
@@ -95,7 +96,17 @@ export async function exercise6() {
         // If symbol went below button area, return it to top (infinite loop)
         if (columnsSymbols[i].y > visibleAreaBottom) {
           columnsSymbols[i].y = columnsSymbols[i].y - symbolsInColumn * symbolsHeight
+        }
+        
+        // Change symbol: every frame (if flag enabled) or only when looping (old mode)
+        if (CHANGE_SYMBOLS_EVERY_FRAME) {
+          // New mode: change symbol every frame
           columnsSymbols[i].text = symbols[Math.floor(Math.random() * symbols.length)]
+        } else {
+          // Old mode: change symbol only when looping
+          if (columnsSymbols[i].y > visibleAreaBottom) {
+            columnsSymbols[i].text = symbols[Math.floor(Math.random() * symbols.length)]
+          }
         }
       }
       
