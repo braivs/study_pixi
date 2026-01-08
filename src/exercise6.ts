@@ -16,44 +16,32 @@ export async function exercise6() {
   document.body.appendChild(app.canvas)
 
   const symbols = ['🍒', '🍋', '🍊', '🔔', '⭐']
+  const columnsSymbols: Text[] = []
+  const symbolsInColumn = 5 // More symbols for infinite loop
+  const visibleAreaTop = 50 // Top of visible area
+  const visibleAreaBottom = 185 // Bottom of visible area (above button)
+  const symbolsHeight =  70 // - exactly 3 symbols fit
 
-  const symbol = new Text({
-    text: symbols[0],
-    style: {
-      fontSize: 60,
-      fill: '#FFFFFF'
-    }
-  })
-  symbol.anchor.set(0.5)
-  symbol.x = 200
-  symbol.y = 50 // begin at top
+  // Create symbols in column
+  for (let i = 0; i < symbolsInColumn; i++) {
+    const symbol = new Text({
+      text: symbols[0],
+      style: {
+        fontSize: 60,
+        fill: '#FFFFFF'
+      }
+    })
 
-  app.stage.addChild(symbol)
+    symbol.anchor.set(0.5)
+    symbol.x = 200
+    symbol.y = visibleAreaTop + i * symbolsHeight // begin at top
+
+    app.stage.addChild(symbol)
+    columnsSymbols.push(symbol)
+  }
 
   let isSpinning = false // Flag: is slot is spinning
-  let targetY = 150 // Where the symbol must land
-  let startY = 50
-  let progress = 0
-  const animationDuration = 60 // Number of frames for animation
-
-  // Easing function: smooth acceleration at start, smooth deceleration at end
-  function easeInOut(progress: number): number {
-    // progress goes from 0 (start) to 1 (end)
-    
-    const half = 0.5 // Middle of animation
-    
-    if (progress < half) {
-      // First half: acceleration (ease-in)
-      // Square makes movement slow at start, fast towards middle
-      return 2 * progress * progress
-    } else {
-      // Second half: deceleration (ease-out)
-      // Reverse progress: from 1 to 0.5, square it and invert
-      const reversedProgress = 2 - 2 * progress // from 1 to 0
-      const squared = reversedProgress * reversedProgress
-      return 1 - squared / 2
-    }
-  }
+  let columnSpeed = 0 // Speed of column scrolling
 
   // Button
   const button = new Graphics()
@@ -83,27 +71,37 @@ export async function exercise6() {
   button.on('pointerdown', () => {
     if (!isSpinning) { // Prevent roll, if it is spinning
       isSpinning = true
-      symbol.y = 50 // return to top
-      startY = 50
-      targetY = 150
-      progress = 0 // Reset progress
-      symbol.text = symbols[Math.floor(Math.random() * symbols.length)]
+      columnSpeed = 15 // Fast initial speed
+      
+      // Update all symbols to random
+      for (let i = 0; i < symbolsInColumn; i++) {
+        columnsSymbols[i].text = symbols[Math.floor(Math.random() * symbols.length)]
+      }
     }
   })
 
-  // Animation: move symbol down with easing
+  // Animation: move all symbols down with easing (fast start, slow end)
   app.ticker.add(() => {
-    if (isSpinning && progress < 1) {
-      progress += 1 / animationDuration
-      if (progress > 1) progress = 1
+    if (isSpinning) {
+      // Move all symbols down
+      for (let i = 0; i < symbolsInColumn; i++) {
+        columnsSymbols[i].y += columnSpeed
+        
+        // If symbol went below button area, return it to top (infinite loop)
+        if (columnsSymbols[i].y > visibleAreaBottom) {
+          columnsSymbols[i].y = columnsSymbols[i].y - symbolsInColumn * symbolsHeight
+          columnsSymbols[i].text = symbols[Math.floor(Math.random() * symbols.length)]
+        }
+      }
       
-      // Apply easing function
-      const easedProgress = easeInOut(progress)
+      // Easing: slow down gradually (fast start, slow end)
+      columnSpeed *= 0.98
       
-      // Calculate position based on eased progress
-      symbol.y = startY + (targetY - startY) * easedProgress
-    } else if (isSpinning) {
-      isSpinning = false
+      // Stop when speed is very low
+      if (columnSpeed < 0.1) {
+        columnSpeed = 0
+        isSpinning = false
+      }
     }
   })
 
