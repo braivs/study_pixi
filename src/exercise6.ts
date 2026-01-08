@@ -69,6 +69,9 @@ export async function exercise6() {
   button.cursor = 'pointer'
 
   button.on('pointerdown', () => {
+    winsText.visible = false
+    youGotText.visible = false
+
     if (!isSpinning) { // Prevent roll, if it is spinning
       isSpinning = true
       columnSpeed = 15 // Fast initial speed
@@ -79,6 +82,8 @@ export async function exercise6() {
       }
     }
   })
+
+  let winningSymbol: Text | null = null
 
   // Animation: move all symbols down with easing (fast start, slow end)
   app.ticker.add(() => {
@@ -103,7 +108,7 @@ export async function exercise6() {
         isSpinning = false
 
         // finding last visible symbol (most low before button)
-        let winningSymbol: Text | null = null
+
         let maxY = visibleAreaTop
 
         // Go via all symbols & find most low visible
@@ -118,16 +123,62 @@ export async function exercise6() {
           }
         }
 
-        // show to console
+        // WIN CONDITION
+        winsText.visible = !!(winningSymbol && winningSymbol.text === '⭐');
+
+        // show got symbol
         if (winningSymbol) {
-          console.log('Wining symbol: ' + winningSymbol.text)
+          youGotText.text = `${YOU_GOT_PREFIX}${winningSymbol.text}`
+          youGotText.visible = true
         } else {
           console.warn('Something went wrong')
+          youGotText.visible = false
         }
       }
-
-
     }
   })
+
+  // Game rules
+  const rulesText = new Text({
+    text: 'Got ⭐ to win',
+    style: {
+      fill: '#FFFFFF',
+      fontSize: 20,
+    }
+  })
+  rulesText.x = 10
+  rulesText.y = 20
+  app.stage.addChild(rulesText)
+
+  const winsText = new Text({
+    text: `WIN!`,
+    style: {
+      fontSize: 50,
+      fill: '#FFFFFF',
+    }
+  })
+  winsText.anchor.set(1, 1)
+  winsText.x = app.screen.width - 10
+  winsText.y = app.screen.height - 40
+  winsText.visible = false
+  app.stage.addChild(winsText)
+
+  const YOU_GOT_PREFIX = 'You got: '
+
+  const youGotText = new Text({
+    text: `${YOU_GOT_PREFIX}${winningSymbol}`,
+    style: {
+      fontSize: 23,
+      fill: '#FFFFFF',
+    }
+  })
+
+  youGotText.anchor.set(0, 1)
+  youGotText.x = 10
+  youGotText.y = app.screen.height - 30
+  youGotText.visible = winningSymbol !== null
+
+  app.stage.addChild(youGotText)
+
 
 }
