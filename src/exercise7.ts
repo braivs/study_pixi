@@ -79,10 +79,11 @@ export async function exercise7() {
       reel.targetY = 150
       reel.symbol.y = 50
 
+      reel.symbol.text = symbols[Math.floor(Math.random() * symbols.length)]
+
       // Each subsequent rail stops later
       setTimeout(() => {
         reel.targetY = 150
-        reel.symbol.text = symbols[Math.floor(Math.random() * symbols.length)]
       }, index * 500)
     })
   })
@@ -96,6 +97,8 @@ export async function exercise7() {
         reel.y += 5
         reel.symbol.y = reel.y
         allStopped = false
+      } else if (reel.spinning) {
+        reel.spinning = false
       }
     })
 
