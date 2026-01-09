@@ -1,4 +1,4 @@
-import {exercise6} from "./exercise6.ts";
+import {exercise7} from "./exercise7.ts";
 
 (async () => {
 
@@ -9,5 +9,6 @@ import {exercise6} from "./exercise6.ts";
   // await exercise3_v2();
   // await exercise4();
   // await exercise5()
-  await exercise6()
+  // await exercise6()
+  await exercise7()
 })();
