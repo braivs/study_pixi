@@ -21,6 +21,12 @@ export async function exercise7() {
 
   const YOU_GOT_PREFIX = 'You got: '
 
+  let balance = 1070
+  const BALANCE_PREFIX = 'Balance: '
+
+  const WIN_PAYOUT = 600
+  const ROLL_PRICE = 50
+
   // creating 3 symbols (1 for rail)
   const reel1 = new Text({text: symbols[0], style: {fontSize: 60, fill: '#FFFFFF'}})
   const reel2 = new Text({text: symbols[0], style: {fontSize: 60, fill: '#FFFFFF'}})
@@ -73,6 +79,26 @@ export async function exercise7() {
 
   let canSpin = true
 
+  // Function to update button state based on balance and spinning status
+  const updateButtonState = () => {
+    const hasEnoughBalance = balance >= ROLL_PRICE
+    const isEnabled = canSpin && hasEnoughBalance
+
+    // Clear and redraw button with new color
+    button.clear()
+    button.roundRect(0, 0, 120, 50, 10)
+    
+    if (isEnabled) {
+      button.fill(0x00FF00)  // Green when enabled
+      button.cursor = 'pointer'
+      button.eventMode = 'static'
+    } else {
+      button.fill(0x666666)  // Gray when disabled
+      button.cursor = 'auto'
+      button.eventMode = 'static'  // Still static to show cursor, but we check balance in handler
+    }
+  }
+
   let winningCombination: string[] | null = null
 
   // Create text display for winning combination
@@ -98,6 +124,11 @@ export async function exercise7() {
     }
   }
 
+  const updateBalanceDisplay = () => {
+    balanceText.text = `${BALANCE_PREFIX}${balance}`
+    updateButtonState()  // Update button state when balance changes
+  }
+
   const winsText = new Text({
     text: `WIN!`,
     style: {
@@ -109,11 +140,18 @@ export async function exercise7() {
   winsText.x = app.screen.width - 10
   winsText.y = app.screen.height - 30
   winsText.visible = false
+
+
   
   app.stage.addChild(youGotText, winsText)
 
   button.on('pointerdown', () => {
     if (!canSpin) return
+    if (balance < ROLL_PRICE) return  // Not enough balance
+
+    // Deduct roll price
+    balance -= ROLL_PRICE
+    updateBalanceDisplay()
  
     canSpin = false
     winningCombination = null  // Reset winning combination
@@ -191,15 +229,46 @@ export async function exercise7() {
       // check win
       if (reels[0].symbol.text === reels[1].symbol.text &&
         reels[1].symbol.text === reels[2].symbol.text) {
+        balance += WIN_PAYOUT
+        updateBalanceDisplay()  // This will also update button state
         winsText.visible = true
         console.log('WIN!', winningCombination)
       } else {
         winsText.visible = false
       }
 
+      // Update button state after spin ends (check if we can spin again)
+      updateButtonState()
+
     }
   })
 
   app.stage.addChild(button)
+
+  // Game rules
+  const rulesText = new Text({
+    text: 'Rules: got 3 same symbol to win',
+    style: {
+      fill: '#FFFFFF',
+      fontSize: 20,
+    }
+  })
+  rulesText.x = 10
+  rulesText.y = 20
+  app.stage.addChild(rulesText)
+
+  const balanceText = new Text({
+    text: `${BALANCE_PREFIX}${balance}`,
+    style: {
+      fontSize: 40,
+      fill: '#FFFFFF',
+    }
+  })
+  balanceText.x = 10
+  balanceText.y = app.screen.height - 110
+  app.stage.addChild(balanceText)
+
+  // Initialize button state
+  updateButtonState()
 
 }
