@@ -17,6 +17,9 @@ export async function exercise7() {
 
   const symbols = ['🍒', '🍋', '🍊', '🔔', '⭐']
   const CHANGE_SYMBOLS_EVERY_FRAME = true // Flag: change symbols every frame during spin
+  const SPIN_DELAY = 500
+
+  const YOU_GOT_PREFIX = 'You got: '
 
   // creating 3 symbols (1 for rail)
   const reel1 = new Text({text: symbols[0], style: {fontSize: 60, fill: '#FFFFFF'}})
@@ -70,10 +73,52 @@ export async function exercise7() {
 
   let canSpin = true
 
+  let winningCombination: string[] | null = null
+
+  // Create text display for winning combination
+  const youGotText = new Text({
+    text: `${YOU_GOT_PREFIX}`,
+    style: {
+      fontSize: 23,
+      fill: '#FFFFFF',
+    }
+  })
+  youGotText.anchor.set(0, 1)
+  youGotText.x = 10
+  youGotText.y = app.screen.height - 30
+  youGotText.visible = false
+  
+  // Update text when winning combination changes
+  const updateYouGotText = () => {
+    if (winningCombination) {
+      youGotText.text = `${YOU_GOT_PREFIX}${winningCombination.join(' ')}`
+      youGotText.visible = true
+    } else {
+      youGotText.visible = false
+    }
+  }
+
+  const winsText = new Text({
+    text: `WIN!`,
+    style: {
+      fontSize: 50,
+      fill: '#FFFFFF',
+    }
+  })
+  winsText.anchor.set(1, 1)
+  winsText.x = app.screen.width - 10
+  winsText.y = app.screen.height - 30
+  winsText.visible = false
+  
+  app.stage.addChild(youGotText, winsText)
+
   button.on('pointerdown', () => {
     if (!canSpin) return
  
     canSpin = false
+    winningCombination = null  // Reset winning combination
+    youGotText.visible = false
+    winsText.visible = false
 
     // run all reels
     reels.forEach((reel, index) => {
@@ -93,7 +138,7 @@ export async function exercise7() {
         // Set final symbol when reel is allowed to stop
         reel.symbol.text = symbols[Math.floor(Math.random() * symbols.length)]
         reel.canStop = true  // Grant permission to stop
-      }, index * 500)
+      }, index * SPIN_DELAY)
     })
   })
 
@@ -133,10 +178,23 @@ export async function exercise7() {
     if (allStopped && !canSpin) {
       canSpin = true
 
+      // Save winning combination (symbols from all reels)
+      winningCombination = [
+        reels[0].symbol.text,
+        reels[1].symbol.text,
+        reels[2].symbol.text
+      ]
+
+      // Update display
+      updateYouGotText()
+
       // check win
       if (reels[0].symbol.text === reels[1].symbol.text &&
         reels[1].symbol.text === reels[2].symbol.text) {
-        console.log('WIN!')
+        winsText.visible = true
+        console.log('WIN!', winningCombination)
+      } else {
+        winsText.visible = false
       }
 
     }
